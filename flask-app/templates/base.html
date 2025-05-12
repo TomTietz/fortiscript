@@ -1,0 +1,45 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FortiScript {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="burger-menu" onclick="toggleSidebar()">☰</div>
+    
+    <div class="sidebar" id="sidebar">
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/csv-to-cli">CSV to CLI</a></li>
+            <li><a href="/templates">Templates</a></li>
+            <li><a href="/jinja">FMG Jinja</a></li>
+            <li><a href="/about">About</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content" id="mainContent">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('mainContent').classList.toggle('shifted');
+        }
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const burger = document.querySelector('.burger-menu');
+            
+            if (!sidebar.contains(event.target) && !burger.contains(event.target)) {
+                sidebar.classList.remove('active');
+                document.getElementById('mainContent').classList.remove('shifted');
+            }
+        });
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

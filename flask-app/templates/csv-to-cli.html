@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}CSV to CLI{% endblock %}
+{% block content %}
+    <div class="container">
+        <h1 style="text-align: center;">CSV >>> FortiOS CLI</h1>
+        <form method="POST">
+            <input type="text" name="vdom" class="vdom-input" placeholder="VDOM (default = root)" value="{{ request.form.vdom if request.method == 'POST' }}">
+
+            <textarea name="input_text1" placeholder="Zone;Segment;IP;VLANID;Interface">{% if request.method == 'POST' %}{{ request.form.input_text1 }}{% endif %}</textarea>
+            <textarea name="input_text2" placeholder="Destination;Gateway;Interface;Comment">{% if request.method == 'POST' %}{{ request.form.input_text2 }}{% endif %}</textarea>
+            <div class="separator-group">
+                <select name="separator" class="separator-select" onchange="this.form.submit()">
+                    <option value=";" {% if selected_separator == ';' %}selected{% endif %}>Semicolon (;) separator</option>
+                    <option value="," {% if selected_separator == ',' %}selected{% endif %}>Comma (,) separator</option> 
+                    <option value="excel" {% if selected_separator == 'excel' %}selected{% endif %}>Excel Copy-and-Paste</option> 
+                </select>
+            </div>
+            <div class="button-group">
+                <button type="submit" name="vlan_button" class="vlan-btn">VLANs & Zones</button>
+                <button type="submit" name="route_button" class="route-btn">Routes</button>
+            </div>
+
+            {% if show_warning %}
+            <div class="warning-message">
+                ⚠️ Warning: Excel separator selected. Make sure your value columns contain no whitespace.
+            </div>
+            {% endif %}
+
+            <div class="output-container">
+                <button type="button" class="copy-btn" onclick="copyOutput()">Copy</button>
+                <textarea id="outputText" readonly placeholder="FortiOS script will appear here...">{{ output_text }}</textarea>
+            </div>
+        </form>
+    </div>
+    <script>
+        function copyOutput() {
+            const outputText = document.getElementById("outputText");
+            outputText.select();
+            document.execCommand("copy");
+            
+            // Change button text temporarily to provide feedback
+            const copyBtn = document.querySelector(".copy-btn");
+            const originalText = copyBtn.textContent;
+            copyBtn.textContent = "Copied!";
+            setTimeout(() => {
+                copyBtn.textContent = originalText;
+            }, 2000);
+        }
+    </script>
+{% endblock %}

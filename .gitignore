@@ -1,0 +1,6 @@
+notes.md
+*.txt
+!flask-app/requirements.txt
+data/*
+vpn/*
+test.py
