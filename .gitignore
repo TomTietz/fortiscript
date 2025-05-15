@@ -4,3 +4,4 @@ notes.md
 data/*
 vpn/*
 test.py
+utility/__pycache__/*

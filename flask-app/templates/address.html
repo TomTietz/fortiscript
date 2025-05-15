@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}adress{% endblock %}
+{% block content %}
+    <div class="container">
+        <h1 style="text-align: center;">CSV -> FortiOS Address Objects</h1>
+        <form method="POST">
+            <input type="text" name="vdom" class="vdom-input" placeholder="VDOM (default = root)" value="{{ request.form.vdom if request.method == 'POST' }}">
+
+            <textarea name="input_text1" placeholder="Name;Type;Value;Comment">{% if request.method == 'POST' %}{{ request.form.input_text1 }}{% endif %}</textarea>
+            <div class="separator-group">
+                <select name="separator" class="separator-select" onchange="this.form.submit()">
+                    <option value=";" {% if selected_separator == ';' %}selected{% endif %}>Semicolon (;) separator</option>
+                    <option value="," {% if selected_separator == ',' %}selected{% endif %}>Comma (,) separator</option> 
+                    <option value="excel" {% if selected_separator == 'excel' %}selected{% endif %}>Excel Copy-and-Paste</option> 
+                </select>
+                <select name="ipversion" class="separator-select" onchange="this.form.submit()">
+                    <option value="4" {% if selected_separator == ';' %}selected{% endif %}>IPv4</option>
+                    <option value="6" {% if selected_separator == ',' %}selected{% endif %}>IPv6</option> 
+                </select>
+            </div>
+            <div class="button-group">
+                <button type="submit" name="vlan_button" class="vlan-btn">Convert</button>
+            </div>
+
+            {% if show_warning %}
+            <div class="warning-message">
+                ⚠️ Warning: Excel separator selected. Make sure your value columns contain no whitespace.
+            </div>
+            {% endif %}
+
+            {% if error %}
+            <div class="warning-message">
+                ❌ Error: {{ error }}
+            </div>
+            {% endif %}
+            
+            <div class="output-container">
+                <button type="button" class="copy-btn" onclick="copyOutput()">Copy Text</button>
+                <textarea id="outputText" readonly placeholder="FortiOS script will appear here...">{{ output }}</textarea>
+            </div>
+        </form>
+    </div>
+{% endblock %}

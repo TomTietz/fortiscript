@@ -151,3 +151,19 @@ button {
     margin: 15px 0;
     font-weight: bold;
 }
+
+/* Add these styles */
+.template-field {
+    height: 200px;
+    font-family: monospace;
+    white-space: pre-wrap;
+}
+
+.variables-field {
+    height: 150px;
+    font-family: monospace;
+}
+
+.json-key { color: #d9534f; }
+.json-string { color: #5cb85c; }
+.json-number { color: #5bc0de; }

@@ -1,9 +1,29 @@
 {% extends "base.html" %}
 {% block title %}jinja{% endblock %}
 {% block content %}
-{{ super() }}
     <div class="container">
-        <h1>FMG Jinja</h1>
-        <p>This page is under construction</p>
+        <h1>Jinja Template Renderer</h1>
+        <form method="POST">
+            <textarea name="template" placeholder="Enter Jinja template here..." 
+                     class="template-field">{{ template_content }}</textarea>
+            
+            <textarea name="variables" placeholder="Enter variables as JSON (e.g., {'name': 'John'})..." 
+                     class="variables-field">{{ variables_content }}</textarea>
+            
+            <div class="button-group">
+                <button type="submit" class="lower-btn">Render Template</button>
+            </div>
+
+            {% if error %}
+            <div class="warning-message">
+                ⚠️ Error: {{ error }}
+            </div>
+            {% endif %}
+            
+            <div class="output-container">
+                <button type="button" class="copy-btn" onclick="copyOutput()">Copy Text</button>
+                <textarea id="outputText" readonly placeholder="Rendered template will appear here...">{{ output }}</textarea>
+            </div>
+        </form>
     </div>
 {% endblock %}

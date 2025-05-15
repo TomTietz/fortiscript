@@ -21,6 +21,8 @@ def ensure_csv_header(s,delimeter,mode='vlan'):
             columns = ['Zone','Segment','IP','VLANID','Interface']
         case 'route':
             columns = ['Destination','Gateway','Interface','Comment']
+        case 'address':
+            columns = ['Name','Type','Value','Comment']
         case _:
             raise ValueError(f'Header mode {mode} unknown')
     # Prepare CSV string
@@ -123,7 +125,6 @@ def script_zones(input,vdom=None,delimeter=';'):
         config_blocks.append('    end\n  next\n end\n')
     else:
         config_blocks.append('end\n')
-
     return ''.join(config_blocks)
 
 
@@ -160,5 +161,49 @@ def script_routes(input,vdom,delimeter=';'):
     return ''.join(config_blocks)
 
 
-## TODO: Change functions to take strings instead of file names
-## TODO: write wrapper function in main file to read csv files
+def script_addresses(input,vdom,delimeter=';',ipversion=4):
+    # Initialize list to store configuration blocks
+    config_blocks = []
+    # Create a file-like object from the string
+    csv_file = StringIO(ensure_csv_header(input,delimeter,mode='address'))
+    # Continue as with normal CSV file
+    csv_reader = csv.DictReader(csv_file,delimiter=delimeter)
+    config_block_name = 'address6' if ipversion == 6 else 'address'
+    if vdom != None:
+        config_blocks.append(f'config vdom\n  edit "{vdom}"\n    config firewall {config_block_name}\n')
+    else:
+        config_blocks.append(f'config firewall {config_block_name}\n')
+    edit_indent = '  ' if vdom is None else '      '
+    for row in csv_reader:
+        # Create configuration block for each row
+        config_block =  f'{edit_indent}edit {row['Name']}\n'
+        config_block += f'{edit_indent}  set type {row["Type"]}\n'
+        config_block += f'{edit_indent}  set {row["Type"]}\n'
+        config_block += f'{edit_indent}  set type {row["Type"]}\n'
+        config_block += f'{edit_indent}  set comment "{row["Comment"]}"\n'
+        value_block = ''
+        match row["Type"]:
+            case 'ipmask':    # Standard IPv4 address with subnet mask.
+                value_block = f'{edit_indent}  set subnet {row["Value"]}\n'
+            case 'iprange':   # Range of IPv4 addresses between two specified addresses (inclusive).
+                value_block = f'{edit_indent}  set start-ip {row["Value"].split('-')[0]}\n{edit_indent}  set end-ip {row["Value"].split('-')[1]}\n' if ipversion == 6 else f'{edit_indent}  set subnet {row["Value"].split('-')[0]} {row["Value"].split('-')[1]}\n'
+            case 'fqdn':      # Fully Qualified Domain Name address.
+                value_block = f'{edit_indent}  set fqdn {row["Value"]}\n'
+            case 'geography': # IP addresses from a specified country.
+                value_block = f'{edit_indent}  set country {row["Value"]}\n'
+            case 'wildcard':  # Standard IPv4 using a wildcard subnet mask.
+                value_block = f'{edit_indent}  set wildcard {row["Value"]}\n'
+            case 'ipprefix':  # Uses the IP prefix to define a range of IPv6 addresses.
+                value_block = f'{edit_indent}  set ip6 {row["Value"]}\n'
+            case _:           # Unknown Type
+                raise ValueError('Unsupported Adress Type')
+        config_block += value_block
+        config_block +=  f'{edit_indent}next\n'
+        config_blocks.append(config_block)
+    if vdom != None:
+        config_blocks.append('    end\n  next\n end')
+    else:
+        config_blocks.append('end')
+    # Combine all configuration blocks into a single string
+    return ''.join(config_blocks)
+
