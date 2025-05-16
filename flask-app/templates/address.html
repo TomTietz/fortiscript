@@ -19,7 +19,7 @@
                 </select>
             </div>
             <div class="button-group">
-                <button type="submit" name="vlan_button" class="vlan-btn">Convert</button>
+                <button type="submit" name="addr_button" class="vlan-btn">Convert</button>
             </div>
 
             {% if show_warning %}
@@ -36,7 +36,7 @@
             
             <div class="output-container">
                 <button type="button" class="copy-btn" onclick="copyOutput()">Copy Text</button>
-                <textarea id="outputText" readonly placeholder="FortiOS script will appear here...">{{ output }}</textarea>
+                <textarea id="outputText" readonly placeholder="FortiOS script will appear here...">{{ output_text }}</textarea>
             </div>
         </form>
     </div>

@@ -47,7 +47,7 @@ def templates():
     return render_template('templates.html')
 
 @app.route('/address', methods=['GET', 'POST'])
-def placeholder():
+def address():
     output_text = ''
     error = ''
     selected_separator = ';'
@@ -55,7 +55,6 @@ def placeholder():
     if request.method == 'POST':
         try:
             data_text = request.form.get('input_text1', '')
-            
             ipversion = request.form.get('ipversion', ',')
             selected_separator = request.form.get('separator', ',')
             actual_separator = ';'
@@ -68,7 +67,7 @@ def placeholder():
             if not vdom:
                 vdom = None
             
-            if 'vlan_button' in request.form:
+            if 'addr_button' in request.form:
                 output_text = t.script_addresses(data_text,vdom=vdom,delimeter=actual_separator,ipversion=int(ipversion))
             
         except Exception as e:
