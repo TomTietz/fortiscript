@@ -14,8 +14,8 @@
                     <option value="excel" {% if selected_separator == 'excel' %}selected{% endif %}>Excel Copy-and-Paste</option> 
                 </select>
                 <select name="ipversion" class="separator-select" onchange="this.form.submit()">
-                    <option value="4" {% if selected_separator == ';' %}selected{% endif %}>IPv4</option>
-                    <option value="6" {% if selected_separator == ',' %}selected{% endif %}>IPv6</option> 
+                    <option value="4" {% if selected_ipversion == '4' %}selected{% endif %}>IPv4</option>
+                    <option value="6" {% if selected_ipversion == '6' %}selected{% endif %}>IPv6</option> 
                 </select>
             </div>
             <div class="button-group">

@@ -187,10 +187,10 @@ def script_addresses(input,vdom,delimeter=';',ipversion=4):
     edit_indent = '  ' if vdom is None else '      '
     for row in csv_reader:
         # Create configuration block for each row
-        config_block =  f'{edit_indent}edit {row['Name']}\n'
+        config_block =  f'{edit_indent}edit "{row['Name']}"\n'
         config_block += f'{edit_indent}  set type {row["Type"]}\n'
-        config_block += f'{edit_indent}  set {row["Type"]}\n'
-        config_block += f'{edit_indent}  set type {row["Type"]}\n'
+        #config_block += f'{edit_indent}  set {row["Type"]}\n'
+        #config_block += f'{edit_indent}  set type {row["Type"]}\n'
         config_block += f'{edit_indent}  set comment "{row["Comment"]}"\n'
         value_block = ''
         match row["Type"]:

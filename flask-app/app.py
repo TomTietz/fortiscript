@@ -96,6 +96,7 @@ def address():
                          error=error,
                          output_text=output_text,
                          selected_separator=selected_separator,
+                         selected_ipversion=ipversion,
                          show_warning=(selected_separator == 'excel'))
 
 
