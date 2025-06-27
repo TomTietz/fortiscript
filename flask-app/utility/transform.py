@@ -3,6 +3,17 @@ from collections import defaultdict
 from io import StringIO
 import re
 
+def format_zone_name(input_string,naming_prefix='z_'):
+    # Replace the words and symbols
+    transformed_string = input_string.replace("Zone", "")
+    transformed_string = transformed_string.rstrip()
+    transformed_string = transformed_string.replace(" ", "_")
+    transformed_string = transformed_string.replace("__", "_")
+    transformed_string = transformed_string.replace("-", "")
+    # Make every character lowercase
+    transformed_string = transformed_string.lower()
+    return  naming_prefix + transformed_string
+
 
 def read_until_char(s, char,inverse=False):
     """Return the substring up to the first occurrence of specified character."""
@@ -18,7 +29,7 @@ def ensure_csv_header(s,delimeter,mode='vlan'):
     columns = []
     match mode:
         case 'vlan':
-            columns = ['Zone','Segment','IP','VLANID','Interface']
+            columns = ['Zone','Name','IP','VLANID','Interface']
         case 'route':
             columns = ['Destination','Gateway','Interface','Comment']
         case 'address':
@@ -54,13 +65,11 @@ def create_zone_segment_dict(csv_file):
     return zone_segment_dict
 
 
-def script_vlans(input,vdom=None,delimeter=';'):
-    # Initialize list to store configuration blocks
+def script_vlans(input,vdom=None,delimeter=';',naming='vlan_',format_names=False):
     config_blocks = []
-    # Create a file-like object from the string
+    created_vlans = []
     csv_string = ensure_csv_header(input,delimeter)
     csv_file = StringIO(csv_string)
-    # Continue as with normal CSV file
     csv_reader = csv.DictReader(csv_file,delimiter=';')
     if vdom != None:
         config_blocks.append(f'config vdom\n  edit "{vdom}"\n    config system interface\n')
@@ -68,13 +77,14 @@ def script_vlans(input,vdom=None,delimeter=';'):
         config_blocks.append('config system interface\n')
     edit_indent = '  ' if vdom is None else '      '
     for row in csv_reader:
-        #return csv_string
         if row["VLANID"] == 'n/a':
             continue
         # Create configuration block for each row
-        config_block =  f'{edit_indent}edit "vlan_{row["VLANID"]}"\n'
+        vlan_name = naming + row["VLANID"] #if not format_names else format_zone_name(row["VLANID"],naming)
+        created_vlans.append(vlan_name)
+        config_block =  f'{edit_indent}edit "{vlan_name}"\n'
         config_block += f'{edit_indent}  set ip {row["IP"]}\n'
-        config_block += f'{edit_indent}  set alias "{row["Segment"]}"\n'
+        config_block += f'{edit_indent}  set alias "{row["Name"]}"\n'
         config_block += f'{edit_indent}  set vlanid {row["VLANID"]}\n'
         config_block += f'{edit_indent}  set interface "{row["Interface"]}"\n'
         config_block += f'{edit_indent}  set status down\n'
@@ -87,11 +97,11 @@ def script_vlans(input,vdom=None,delimeter=';'):
     else:
         config_blocks.append('end\n')
     # Combine all configuration blocks into a single string
-    return ''.join(config_blocks)
+    return ''.join(config_blocks), created_vlans
 
 
 
-def script_zones(input,vdom=None,delimeter=';'):
+def script_zones(input,vdom=None,delimeter=';',naming='vlan_',format_names=False):
     # Create a defaultdict to store zones and their unique segments
     zone_segment_dict = defaultdict(set)  # Using set to ensure unique segments
     # Create a file-like object from the string
@@ -103,7 +113,8 @@ def script_zones(input,vdom=None,delimeter=';'):
         zone = row['Zone']
         if zone == "":
             continue
-        id = f'"vlan_{str(row['VLANID'])}"'
+        zone = format_zone_name(row['Zone']) if format_names else zone
+        id = naming + str(row['VLANID'])
         # Add the segment to the zone's set (automatically handles duplicates)
         zone_segment_dict[zone].add(id)
     # Convert sets to lists for the final dictionary
@@ -207,3 +218,18 @@ def script_addresses(input,vdom,delimeter=';',ipversion=4):
     # Combine all configuration blocks into a single string
     return ''.join(config_blocks)
 
+
+def script_address_object_removal(vlans,vdom=None):
+    config_blocks = []
+    if vdom != None:
+        config_blocks.append(f'config vdom\n  edit "{vdom}"\n    config firewall address\n')
+    else:
+        config_blocks.append('config firewall address\n')
+    edit_indent = '  ' if vdom is None else '      '
+    for vlan in vlans:
+        config_blocks.append(f'{edit_indent}delete "{vlan} address"\n')
+    if vdom != None:
+        config_blocks.append('    end\n  next\n end\n')
+    else:
+        config_blocks.append('end\n')
+    return ''.join(config_blocks)

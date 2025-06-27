@@ -6,14 +6,37 @@
         <form method="POST">
             <input type="text" name="vdom" class="vdom-input" placeholder="VDOM (default = root)" value="{{ request.form.vdom if request.method == 'POST' }}">
 
-            <textarea name="input_text1" placeholder="Zone;Segment;IP;VLANID;Interface">{% if request.method == 'POST' %}{{ request.form.input_text1 }}{% endif %}</textarea>
+            <textarea name="input_text1" placeholder="Zone;Name;IP;VLANID;Interface">{% if request.method == 'POST' %}{{ request.form.input_text1 }}{% endif %}</textarea>
             <textarea name="input_text2" placeholder="Destination;Gateway;Interface;Comment">{% if request.method == 'POST' %}{{ request.form.input_text2 }}{% endif %}</textarea>
-            <div class="separator-group">
+            <div class="separator-group" style="display: flex; align-items: center; gap: 15px;">
                 <select name="separator" class="separator-select" onchange="this.form.submit()">
                     <option value=";" {% if selected_separator == ';' %}selected{% endif %}>Semicolon (;) separator</option>
                     <option value="," {% if selected_separator == ',' %}selected{% endif %}>Comma (,) separator</option> 
                     <option value="excel" {% if selected_separator == 'excel' %}selected{% endif %}>Excel Copy-and-Paste</option> 
                 </select>
+
+                <select name="naming" class="separator-select" onchange="this.form.submit()">
+                    <option value="v-" {% if selected_naming == 'v-' %}selected{% endif %}>v-</option>
+                    <option value="v_" {% if selected_naming == 'v_' %}selected{% endif %}>v_</option> 
+                    <option value="vlan-" {% if selected_naming == 'vlan-' %}selected{% endif %}>vlan-</option>
+                    <option value="vlan_" {% if selected_naming == 'vlan_' %}selected{% endif %}>vlan_</option>
+                </select>
+
+                <div style="display: flex; align-items: center;">
+                    <label class="switch">
+                            <input type="checkbox" name="delete_obj" {% if delete_obj %}checked{% endif %}>
+                            <span class="slider round"></span>
+                    </label>
+                    <span class="switch-label">Delete Automatic Address Objects</span>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <label class="switch">
+                            <input type="checkbox" name="format_names" {% if format_names %}checked{% endif %}>
+                            <span class="slider round"></span>
+                    </label>
+                    <span class="switch-label">Format Zone Names</span>
+                </div>
+                
             </div>
             <div class="button-group">
                 <button type="submit" name="vlan_button" class="vlan-btn">VLANs & Zones</button>
@@ -23,6 +46,12 @@
             {% if show_warning %}
             <div class="warning-message">
                 ⚠️ Warning: Excel separator selected. Make sure your value columns contain no whitespace.
+            </div>
+            {% endif %}
+
+            {% if error %}
+            <div class="warning-message">
+                ❌ Error: {{ error }}
             </div>
             {% endif %}
 

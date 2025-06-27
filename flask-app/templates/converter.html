@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}adress{% endblock %}
+{% block content %}
+    <div class="container">
+        <h1 style="text-align: center;">FortiConverter Lite</h1>
+        <form method="POST">
+            <input type="text" name="vdom" class="vdom-input" placeholder="VDOM (default = root)" value="{{ request.form.vdom if request.method == 'POST' }}">
+
+            <textarea name="input_text1" placeholder="Interface Config">{% if request.method == 'POST' %}{{ request.form.input_text1 }}{% endif %}</textarea>
+            <textarea name="input_text2" placeholder="Route Config">{% if request.method == 'POST' %}{{ request.form.input_text2 }}{% endif %}</textarea>
+            <div class="separator-group" style="display: flex; align-items: center; gap: 15px;">
+                <select name="vendor" class="separator-select" onchange="this.form.submit()">
+                    <option value="cisco_switch" {% if selected_vendor == 'cisco_switch' %}selected{% endif %}>Cisco Switch</option>
+                    <option value="dell" {% if selected_vendor == 'dell' %}selected{% endif %}>Dell Switch</option> 
+                    <option value="cisco_asa" {% if selected_vendor == 'cisco_asa' %}selected{% endif %}>Cisco ASA</option> 
+                </select>^
+                <select name="ipversion" class="separator-select" onchange="this.form.submit()">
+                    <option value="4" {% if selected_separator == ';' %}selected{% endif %}>IPv4</option>
+                    <option value="6" {% if selected_separator == ',' %}selected{% endif %}>IPv6</option> 
+                </select>
+            </div>
+            <div class="button-group">
+                <button type="submit" name="convert_button" class="vlan-btn">Convert</button>
+            </div>
+
+            {% if error %}
+            <div class="warning-message">
+                ❌ Error: {{ error }}
+            </div>
+            {% endif %}
+            
+            <div class="output-container">
+                <button type="button" class="copy-btn" onclick="copyOutput()">Copy Text</button>
+                <textarea id="outputText" readonly placeholder="FortiOS script will appear here...">{{ output_text }}</textarea>
+            </div>
+        </form>
+    </div>
+{% endblock %}
