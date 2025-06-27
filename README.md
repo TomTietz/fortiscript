@@ -17,6 +17,7 @@ A web application that converts CSV data into FortiOS CLI commands, simplifying 
 - **VLAN Automation**: Automatic VLAN creation from CSV input
 - **Zone Automation**: Automatic Security Zone creation and assignment
 - **Route Automation**: Static route generation based on CSV parameters
+- **Address Automation**: Create Adress Objects based on CSV parameters
 
 ### 🚧 Upcoming Features
 - **Firewall Policy Generator**: Bulk policy creation from CSV
